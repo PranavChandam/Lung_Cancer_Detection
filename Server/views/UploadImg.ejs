@@ -1,0 +1,68 @@
+<% layout('/layouts/boilerPlate') %>
+
+<head>
+   <link rel="stylesheet" href="/css/uploadImg.css">
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h2>Upload Your Chest Scan</h2>
+    <p>AI-powered analysis of your CT / X-Ray scan for possible signs of lung cancer.</p>
+  </section>
+
+  <!-- Upload Box -->
+  <section class="upload-container">
+    <form action="/predict" method="POST" enctype="multipart/form-data">
+      <div class="upload-box" id="uploadBox">
+        <input type="file" name="scan" id="fileInput" accept=".jpg,.jpeg,.png" required hidden>
+        <label for="fileInput" id="fileLabel">
+          <span class="upload-icon">📂</span>
+          <p>Drag & Drop your file here or <span class="browse">Browse</span></p>
+          <p class="file-types">Supported formats: JPG, PNG</p>
+        </label>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="preview-container" id="previewContainer">
+        <img id="previewImage" src="#" alt="Preview" hidden>
+        <p id="previewText">No file chosen yet</p>
+      </div>
+
+      <button type="submit" class="upload-btn">Analyze Scan</button>
+    </form>
+  </section>
+
+  <!-- Info Section -->
+  <section class="info">
+    <h3>⚠ Important Note</h3>
+    <p>This tool is for research and educational purposes only.  
+    It is <strong>not</strong> a substitute for professional medical diagnosis.  
+    Please consult a healthcare provider for any medical concerns.</p>
+  </section>
+
+  <!-- Script for Preview -->
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const previewImage = document.getElementById('previewImage');
+    const previewText = document.getElementById('previewText');
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          previewImage.src = e.target.result;
+          previewImage.hidden = false;
+          previewText.style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImage.hidden = true;
+        previewText.style.display = "block";
+      }
+    });
+  </script>
+</body>
+
+

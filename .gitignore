@@ -1,0 +1,87 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment / secrets
+.env
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Python caches & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Build / dist
+dist/
+build/
+*.egg-info/
+
+# Data & large files (DO NOT push)
+The IQ-OTHNCCD lung cancer dataset/
+*.csv
+*.tsv
+*.zip
+*.tar.gz
+*.rar
+
+# Uploaded files (app runtime)
+Server/uploads/
+
+# Saved datasets / preprocessed arrays
+saved_data1/
+*.npy
+*.npz
+
+# Trained models / weights
+models123/
+*.keras
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+
+# Gradio temp / cache
+.gradio/
+Lung-Cancer-Detection-And-Prediction-Using-CTscan-main/.gradio/
+
+# Misc generated files
+*.pem
+*.key
+
+# Dependency lockfiles you might not want
+# package-lock.json
+# yarn.lock
+
+# Ignore IDE run/debug folders
+.vscode/
+.idea/
+
+# Optional: ignore node logs and mac/linux system files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
