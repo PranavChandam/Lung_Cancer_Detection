@@ -1,68 +1,92 @@
 <% layout('/layouts/boilerPlate') %>
 
-<head>
-   <link rel="stylesheet" href="/css/uploadImg.css">
-</head>
-<body>
+<link rel="stylesheet" href="/css/uploadImg.css">
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h2>Upload Your Chest Scan</h2>
-    <p>AI-powered analysis of your CT / X-Ray scan for possible signs of lung cancer.</p>
-  </section>
+<!-- Hero Section -->
+<section class="hero">
+  <h2>Upload Your Chest Scan</h2>
+  <p>AI-powered analysis of your CT / X-Ray scan for possible signs of lung cancer.</p>
+</section>
 
-  <!-- Upload Box -->
-  <section class="upload-container">
-    <form action="/predict" method="POST" enctype="multipart/form-data">
-      <div class="upload-box" id="uploadBox">
-        <input type="file" name="scan" id="fileInput" accept=".jpg,.jpeg,.png" required hidden>
-        <label for="fileInput" id="fileLabel">
-          <span class="upload-icon">📂</span>
-          <p>Drag & Drop your file here or <span class="browse">Browse</span></p>
-          <p class="file-types">Supported formats: JPG, PNG</p>
-        </label>
-      </div>
+<!-- Upload Box -->
+<section class="upload-container">
+  <form id="uploadForm" enctype="multipart/form-data">
+    <div class="upload-box" id="uploadBox">
+      <input type="file" name="scan" id="fileInput" accept=".jpg,.jpeg,.png" required hidden>
+      <label for="fileInput" id="fileLabel">
+        <span class="upload-icon">📂</span>
+        <p>Drag & Drop your file here or <span class="browse">Browse</span></p>
+        <p class="file-types">Supported formats: JPG, PNG</p>
+      </label>
+    </div>
 
-      <!-- Image Preview -->
-      <div class="preview-container" id="previewContainer">
-        <img id="previewImage" src="#" alt="Preview" hidden>
-        <p id="previewText">No file chosen yet</p>
-      </div>
+    <!-- Image Preview -->
+    <div class="preview-container" id="previewContainer">
+      <img id="previewImage" src="#" alt="Preview" hidden>
+      <p id="previewText">No file chosen yet</p>
+    </div>
 
-      <button type="submit" class="upload-btn">Analyze Scan</button>
-    </form>
-  </section>
+    <button type="submit" class="upload-btn">Analyze Scan</button>
+  </form>
+</section>
 
-  <!-- Info Section -->
-  <section class="info">
-    <h3>⚠ Important Note</h3>
-    <p>This tool is for research and educational purposes only.  
-    It is <strong>not</strong> a substitute for professional medical diagnosis.  
-    Please consult a healthcare provider for any medical concerns.</p>
-  </section>
+<!-- Info Section -->
+<section class="info">
+  <h3>ℹ Usage Disclaimer</h3>
+  <p>This tool is designed to support both <strong>medical professionals</strong> and <strong>students/researchers</strong>.  
+  It can assist in analysis and decision-making but should be used as a <strong>complement</strong> to clinical expertise, not as a replacement.  
+  Final diagnosis and treatment decisions must always be made by a qualified healthcare provider.</p>
+</section>
 
-  <!-- Script for Preview -->
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const previewImage = document.getElementById('previewImage');
-    const previewText = document.getElementById('previewText');
+<!-- Prediction Result -->
+<div id="resultBox" class="result-box"></div>
 
-    fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          previewImage.src = e.target.result;
-          previewImage.hidden = false;
-          previewText.style.display = "none";
-        };
-        reader.readAsDataURL(file);
+<!-- Script -->
+<script>
+  const fileInput = document.getElementById("fileInput");
+  const previewImage = document.getElementById("previewImage");
+  const previewText = document.getElementById("previewText");
+  const form = document.getElementById("uploadForm");
+  const resultBox = document.getElementById("resultBox");
+
+  // Show preview of image
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImage.src = e.target.result;
+        previewImage.hidden = false;
+        previewText.style.display = "none";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      previewImage.hidden = true;
+      previewText.style.display = "block";
+    }
+  });
+
+  // Handle form submit → call Flask API
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        resultBox.innerHTML = `<h3>Prediction Result:</h3>
+                               <p><strong>File:</strong> ${data.filename}</p>
+                               <p><strong>Prediction:</strong> ${data.prediction}</p>`;
       } else {
-        previewImage.hidden = true;
-        previewText.style.display = "block";
+        resultBox.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
       }
-    });
-  </script>
-</body>
-
-
+    } catch (err) {
+      resultBox.innerHTML = `<p style="color:red;">Server error: ${err.message}</p>`;
+    }
+  });
+</script>

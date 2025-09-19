@@ -1,56 +1,37 @@
 from flask import Flask, request, jsonify
-import tensorflow as tf
-import numpy as np
-from PIL import Image
-import io
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)   # ✅ allows requests from Node (3000)
 
-# ✅ Define available models
-MODELS = {
-    "advanced": "../Advanced_CNN.keras",
-    "basic": "../BasicCNN.keras",
-    "resnet": "../ResNet50.keras"
-}
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "Server", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Function to preprocess uploaded image
-def preprocess_image(image_bytes):
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    img = img.resize((224, 224))   # adjust to match your model input
-    img_array = np.array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-    return img_array
+@app.route("/")
+def home():
+    return "Flask is running. Use POST /predict to analyze scans."
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    if 'file' not in request.files:
+    if "scan" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
-    # ✅ Get model name from request (default: advanced)
-    model_name = request.form.get("model", "advanced").lower()
-    if model_name not in MODELS:
-        return jsonify({"error": f"Invalid model name. Choose from {list(MODELS.keys())}"}), 400
+    file = request.files["scan"]
+    if file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
 
-    model_path = MODELS[model_name]
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(file_path)
 
-    if not os.path.exists(model_path):
-        return jsonify({"error": f"Model file not found: {model_path}"}), 500
-
-    # Load model dynamically
-    model = tf.keras.models.load_model(model_path)
-
-    # Preprocess and predict
-    file = request.files['file']
-    img_array = preprocess_image(file.read())
-
-    prediction = model.predict(img_array)
-    result = prediction.tolist()
+    # Dummy model output
+    result = "Positive"
 
     return jsonify({
-        "model_used": model_name,
+        "success": True,
+        "filename": file.filename,
         "prediction": result
     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
