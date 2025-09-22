@@ -1,0 +1,93 @@
+/* result.css */
+
+/* Reset & basic */
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+header.navbar {
+  width: 100%;
+  background: #4a90e2;
+  color: #fff;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  top: 0;
+}
+
+/* Main content */
+.result-container {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 90%;
+  max-width: 500px;
+  margin: 50px auto;
+  animation: fadeIn 1s ease-in-out;
+  flex: 1; /* ensures footer stays at bottom */
+}
+
+.result-container h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  letter-spacing: 1px;
+}
+
+.result-container p {
+  font-size: 1.1rem;
+  color: #555;
+  margin: 10px 0;
+}
+
+.result-container strong {
+  color: #222;
+}
+
+/* Chart */
+canvas#resultChart {
+  margin-top: 20px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  padding: 10px;
+}
+
+/* Footer */
+footer.footer {
+  width: 100%;
+  background: #333;
+  color: #fff;
+  text-align: center;
+  padding: 15px 0;
+  position: relative;
+  bottom: 0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-20px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .result-container {
+    padding: 20px 25px;
+  }
+
+  .result-container h2 {
+    font-size: 1.5rem;
+  }
+}

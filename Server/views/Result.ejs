@@ -1,16 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prediction Result</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <div class="container">
-    <h1>🩺 Prediction Result</h1>
-    <pre><%= result %></pre>
-    <a href="/" class="btn">⬅ Back</a>
-  </div>
-</body>
-</html>
+<% layout('/layouts/boilerPlate') %>
+
+<link rel="stylesheet" href="/css/result.css">
+
+<section class="result-container">
+  <h2>Prediction Result</h2>
+  <p><strong>File:</strong> <%= filename %></p>
+  <p><strong>Prediction:</strong> <%= prediction %></p>
+  <canvas id="resultChart" width="400" height="300"></canvas>
+</section>
+
+<!-- Pass variables to JS -->
+<script>
+  const predictionData = {
+    prediction: "<%= prediction %>",
+    confidence: <%- JSON.stringify(confidence) %>
+  };
+</script>
+
+<!-- External JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/result.js"></script>

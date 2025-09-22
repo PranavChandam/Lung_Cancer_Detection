@@ -10,7 +10,7 @@
 
 <!-- Upload Box -->
 <section class="upload-container">
-  <form id="uploadForm" enctype="multipart/form-data">
+  <form id="uploadForm" enctype="multipart/form-data" action="/Upload/result" method="POST">
     <div class="upload-box" id="uploadBox">
       <input type="file" name="scan" id="fileInput" accept=".jpg,.jpeg,.png" required hidden>
       <label for="fileInput" id="fileLabel">
@@ -66,27 +66,5 @@
     }
   });
 
-  // Handle form submit → call Flask API
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const formData = new FormData(form);
-
-    try {
-      const response = await fetch("http://127.0.0.1:5000/predict", {
-        method: "POST",
-        body: formData
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        resultBox.innerHTML = `<h3>Prediction Result:</h3>
-                               <p><strong>File:</strong> ${data.filename}</p>
-                               <p><strong>Prediction:</strong> ${data.prediction}</p>`;
-      } else {
-        resultBox.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
-      }
-    } catch (err) {
-      resultBox.innerHTML = `<p style="color:red;">Server error: ${err.message}</p>`;
-    }
-  });
+ 
 </script>

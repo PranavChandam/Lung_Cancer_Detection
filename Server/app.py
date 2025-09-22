@@ -26,11 +26,13 @@ def predict():
 
     # Dummy model output
     result = "Positive"
+    confidence = 87 
 
     return jsonify({
         "success": True,
         "filename": file.filename,
-        "prediction": result
+        "prediction": result,
+        "confidence": confidence   # <-- send confidence to frontend
     })
 
 if __name__ == "__main__":
