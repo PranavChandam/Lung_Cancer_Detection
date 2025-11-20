@@ -3,14 +3,10 @@ from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
 import io
-import tensorflow as tf
 import cv2
 
 app = Flask(__name__)
 
-# =====================================
-# 🔥 LOAD ALL THREE MODELS ON STARTUP
-# =====================================
 print("Loading models... Please wait.")
 
 resnet_model = load_model("ResNet50.keras")
@@ -19,60 +15,64 @@ inception_model = load_model("InceptionV3.keras")
 
 print("Models loaded successfully!")
 
-# =====================================
-# 🔧 IMAGE PREPROCESSING
-# =====================================
 def preprocess_image(image_bytes):
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     image = image.resize((224, 224))
-
     img_array = np.array(image) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     return img_array
 
-# =====================================
-# 🔍 VALIDATION: CHECK IF IMAGE LOOKS LIKE CT SCAN
-# =====================================
-# =====================================
-# 🔍 STRONG VALIDATION: CHECK IF IMAGE IS CT SCAN
-# =====================================
 def is_ct_scan(image_bytes):
     try:
-        img = Image.open(io.BytesIO(image_bytes)).convert("L")  # grayscale
-        img = np.array(img)
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        np_img = np.array(img)
 
-        # Reject too small images
-        if img.shape[0] < 200 or img.shape[1] < 200:
+        # Channels
+        r = np_img[:, :, 0].astype(float)
+        g = np_img[:, :, 1].astype(float)
+        b = np_img[:, :, 2].astype(float)
+
+        # Metrics
+        color_std = (r.std() + g.std() + b.std()) / 3
+        gray = cv2.cvtColor(np_img, cv2.COLOR_RGB2GRAY)
+        texture_std = gray.std()
+
+        edges = cv2.Canny(gray, 30, 100)
+        edge_count = int(np.sum(edges > 0))
+
+        # Grayscale similarity
+        grayscale_score = (
+            np.mean(np.abs(r - g)) +
+            np.mean(np.abs(g - b)) +
+            np.mean(np.abs(b - r))
+        ) / 3
+
+        print("======== CT DEBUG VALUES ========")
+        print("Color STD:", color_std)
+        print("Texture STD:", texture_std)
+        print("Edges:", edge_count)
+        print("GrayScore:", grayscale_score)
+        print("=================================")
+
+        # FINAL STRICT RULES
+        if (
+            color_std > 65 and
+            texture_std > 65 and
+            20000 < edge_count < 80000 and
+            grayscale_score < 5         # ← STRICTER NOW
+        ):
+            return True
+        else:
             return False
 
-        # Canny Edge Detection
-        edges = cv2.Canny(img, 50, 150)
-
-        # Detect circular CT scan region
-        circles = cv2.HoughCircles(
-            img,
-            cv2.HOUGH_GRADIENT,
-            dp=1,
-            minDist=200,
-            param1=50,
-            param2=30,
-            minRadius=80,
-            maxRadius=200
-        )
-
-        # If no circle found → Not a CT scan
-        if circles is None:
-            return False
-
-        return True
-
-    except Exception:
+    except Exception as e:
+        print("Error:", e)
         return False
 
 
-# =====================================
-# 🔥 MAIN ROUTE: PREDICT USING ALL 3 MODELS
-# =====================================
+
+
+
 @app.route("/predict", methods=["POST"])
 def predict_all():
     if "scan" not in request.files:
@@ -81,8 +81,11 @@ def predict_all():
     file = request.files["scan"]
     image_bytes = file.read()
 
+    # 🔴 Reject here if not CT → models will NOT run
     if not is_ct_scan(image_bytes):
-        return jsonify({"error": "Invalid image. Please upload a real lung CT scan."}), 400
+        return jsonify({
+            "error": "This does not look like a lung CT scan. Please upload a valid CT image."
+        }), 400
 
     image = preprocess_image(image_bytes)
 
@@ -118,8 +121,5 @@ def predict_all():
         }
     })
 
-# =====================================
-# 🚀 START FLASK SERVER
-# =====================================
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=False)
