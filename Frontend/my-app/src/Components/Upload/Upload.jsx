@@ -3,12 +3,16 @@ import "./Upload.css";
 
 function Upload() {
   const [file, setFile] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ===========================
-  // FILE VALIDATION
-  // ===========================
+  const [preprocessImg, setPreprocessImg] = useState(null);
+  const [preprocessLoading, setPreprocessLoading] = useState(false);
+
+  // ============================================
+  // FILE VALIDATION + PREPROCESSING (224x224)
+  // ============================================
   const handleFileChange = (e) => {
     const uploaded = e.target.files[0];
     if (!uploaded) return;
@@ -21,18 +25,37 @@ function Upload() {
     }
 
     if (uploaded.size > 5 * 1024 * 1024) {
-      setMessage("File too large. Maximum size is 5MB.");
+      setMessage("File too large. Max 5MB allowed.");
       setFile(null);
       return;
     }
 
-    setFile(uploaded);
     setMessage("");
+    setFile(uploaded);
+
+    // Preprocessing
+    setPreprocessLoading(true);
+
+    const img = new Image();
+    img.src = URL.createObjectURL(uploaded);
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 224;
+      canvas.height = 224;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, 224, 224);
+
+      const processedURL = canvas.toDataURL("image/jpeg");
+      setPreprocessImg(processedURL);
+
+      setTimeout(() => setPreprocessLoading(false), 600);
+    };
   };
 
-  // ===========================
-  // UPLOAD + PREDICT + REDIRECT
-  // ===========================
+  // ============================================
+  // UPLOAD + PREDICT → SAVE → REDIRECT
+  // ============================================
   const handleUpload = async () => {
     if (!file) {
       setMessage("Please select a file first!");
@@ -44,7 +67,6 @@ function Upload() {
 
     try {
       setLoading(true);
-      setMessage("");
 
       const res = await fetch("http://localhost:3000/api/predict", {
         method: "POST",
@@ -59,12 +81,14 @@ function Upload() {
         return;
       }
 
-      // ⭐ Save result & redirect
+      // Save to localStorage
       localStorage.setItem("modelResults", JSON.stringify(data));
+
+      // Redirect to result page
       window.location.href = "/result";
 
-    } catch (error) {
-      console.error("Upload error:", error);
+    } catch (err) {
+      console.error(err);
       setMessage("Something went wrong!");
       setLoading(false);
     }
@@ -76,39 +100,41 @@ function Upload() {
       <p className="subtitle">Upload your CT scan for prediction</p>
 
       <div className="upload-card">
-        <div className="upload-header">
-          <h2>Upload CT Scan Image</h2>
+        <h2>Upload CT Scan Image</h2>
+
+        {/* Original + Preprocessed */}
+        <div className="image-row">
+          
+          <div className="img-box">
+            <h4>Original Image</h4>
+            {file ? (
+              <img src={URL.createObjectURL(file)} alt="original" />
+            ) : (
+              <p>No Image Selected</p>
+            )}
+          </div>
+
+          <div className="img-box">
+            <h4>Preprocessed (224 × 224)</h4>
+            {preprocessLoading ? (
+              <div className="spinner"></div>
+            ) : preprocessImg ? (
+              <img src={preprocessImg} alt="processed" />
+            ) : (
+              <p>No Image</p>
+            )}
+          </div>
         </div>
 
-        {/* Preview */}
-        {file ? (
-          <div className="preview-box">
-            <img src={URL.createObjectURL(file)} alt="Preview" />
-          </div>
-        ) : (
-          <div className="preview-placeholder">
-            <p>No Image Selected</p>
-          </div>
-        )}
-
-        {/* File Input */}
+        {/* Select File */}
         <label className="file-label">
           {file ? file.name : "Choose CT Scan Image"}
-          <input
-            type="file"
-            accept="image/*"
-            className="file-input"
-            onChange={handleFileChange}
-          />
+          <input type="file" accept="image/*" className="file-input" onChange={handleFileChange} />
         </label>
 
         {/* Upload Button */}
         <button className="upload-btn" onClick={handleUpload} disabled={loading}>
-          {loading ? (
-            <div className="spinner"></div>  // ⭐ LOADING SPINNER
-          ) : (
-            "Upload & Predict"
-          )}
+          {loading ? "Processing..." : "Upload & Predict"}
         </button>
 
         {message && <p className="upload-message">{message}</p>}
