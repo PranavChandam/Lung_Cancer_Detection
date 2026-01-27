@@ -139,3 +139,29 @@
     right: 60px;
   }
 }
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  background: #0e0d0d;
+  border: none;
+  color: white;
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #d62822;
+}
