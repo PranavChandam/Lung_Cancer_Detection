@@ -14,7 +14,7 @@ function Login() {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
-  const { login, setUser } = useLogin(); 
+  const { login } = useLogin();
 
   const toggleForm = () => {
     setIsRegister(!isRegister);
@@ -30,82 +30,73 @@ function Login() {
     const newErrors = {};
     const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!emailRegex.test(email.toLowerCase())) {
+    if (!email.trim()) newErrors.email = "Email is required";
+    else if (!emailRegex.test(email.toLowerCase()))
       newErrors.email = "Invalid email address";
-    }
 
-    if (!password.trim()) {
-      newErrors.password = "Password is required";
-    } else if (
-      password.length < 8 ||
-      !/[!@#$%^&*(),.?":{}|<>]/.test(password)
-    ) {
+    if (!password.trim()) newErrors.password = "Password is required";
+    else if (password.length < 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password))
       newErrors.password =
         "Password must be at least 8 characters and include a symbol";
-    }
 
     if (isRegister) {
-      if (!confirmPassword.trim()) {
+      if (!confirmPassword.trim())
         newErrors.confirmPassword = "Confirm your password";
-      } else if (confirmPassword !== password) {
+      else if (confirmPassword !== password)
         newErrors.confirmPassword = "Passwords do not match";
-      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    try {
-      const endpoint = isRegister
-        ? "http://localhost:8080/api/v1/auth/register"
-        : "http://localhost:8080/api/v1/auth/login";
+  try {
+const endpoint = isRegister
+  ? "http://localhost:3000/auth/signup"
+  : "http://localhost:3000/auth/login";
 
-      const payload = isRegister
-        ? { email, password, confirmPassword }
-        : { email, password };
 
-      const res = await axios.post(endpoint, payload);
 
-      if (res.data.success) {
-        Swal.fire({
-          icon: "success",
-          title: isRegister ? "Registered Successfully!" : "Login Successful!",
-          text: res.data.message,
-          confirmButtonColor: "#3085d6",
-        }).then(() => {
-          
-          localStorage.setItem("user", JSON.stringify(res.data.user));
-          login(res.data.user);
-          navigate("/");
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: res.data.message || "Something went wrong",
-          confirmButtonColor: "#d33",
-        });
-      }
-    } catch (err) {
-      const errorMsg =
-        err.response?.data?.message ||
-        "Something went wrong while connecting to the server.";
 
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: errorMsg,
-        confirmButtonColor: "#d33",
-      });
-    }
-  };
+    const payload = isRegister
+      ? { name: email.split("@")[0], email, password }
+      : { email, password };
+
+    const res = await axios.post(endpoint, payload);
+
+if (res.data.message) {
+  Swal.fire({
+    icon: "success",
+    title: isRegister ? "Registered Successfully!" : "Login Successful!",
+    text: res.data.message,
+    confirmButtonColor: "#3085d6",
+  });
+
+  // 🔥 SAVE USER IN CONTEXT + LOCALSTORAGE
+  if (!isRegister) {  
+  login(res.data.user);
+  localStorage.setItem("user", JSON.stringify(res.data.user));
+  localStorage.setItem("token", res.data.token);
+}
+
+
+  navigate("/");
+}
+
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: err.response?.data?.error || "Server error",
+    });
+  }
+};
+
+
 
   return (
     <div className={`login-container ${darkMode ? "dark" : ""}`}>
@@ -154,7 +145,7 @@ function Login() {
           </span>
         </p>
 
-        <p style={{ marginTop: "1.5rem" }}>
+        <p className="theme-toggle">
           <span onClick={toggleTheme}>
             {darkMode ? "🌞 Light Mode" : "🌙 Dark Mode"}
           </span>

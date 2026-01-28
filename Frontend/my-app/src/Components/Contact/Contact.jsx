@@ -1,10 +1,26 @@
 import React, { useState } from "react";
 import "./Contact.css";
+import { useLogin } from "../LoginContext/LoginContext";
 
 const Contact = () => {
+  const { user } = useLogin(); // ✅ inside the component
+
+  // 🔒 If not logged in
+  if (!user) {
+    return (
+      <div className="contact-container">
+        <h2 className="contact-title">Please Login First</h2>
+        <p className="contact-subtitle">
+          You need to be logged in to access the contact page.
+        </p>
+      </div>
+    );
+  }
+
+  // If logged in → show form
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: user.name || "",
+    email: user.email || "",
     message: "",
   });
 
@@ -21,8 +37,8 @@ const Contact = () => {
     alert(`Thank you, ${formData.name}! Your message has been sent.`);
 
     setFormData({
-      name: "",
-      email: "",
+      name: user.name || "",
+      email: user.email || "",
       message: "",
     });
   };
@@ -42,6 +58,7 @@ const Contact = () => {
           value={formData.name}
           onChange={handleChange}
           required
+          disabled // can't change logged-in name
         />
 
         <input
@@ -51,6 +68,7 @@ const Contact = () => {
           value={formData.email}
           onChange={handleChange}
           required
+          disabled // can't change logged-in email
         />
 
         <textarea

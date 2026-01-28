@@ -2,12 +2,29 @@
 
 <link rel="stylesheet" href="/css/result.css">
 
-<section class="result-container">
-  <h2>Prediction Result</h2>
-  <p><strong>File:</strong> <%= filename %></p>
-  <p><strong>Prediction:</strong> <%= prediction %></p>
-  <canvas id="resultChart" width="400" height="300"></canvas>
-</section>
+<div class="result-container">
+  <h1 class="title">Lung Cancer Prediction Result</h1>
+
+  <!-- Prediction -->
+  <div class="prediction-box <%= prediction === 'Positive' ? 'positive' : 'negative' %>">
+    <h2>Prediction: <%= prediction %></h2>
+    <p>Confidence: <%= confidence %>%</p>
+  </div>
+
+  <!-- Advice -->
+  <div class="advice-box">
+    <% if (prediction === "Positive") { %>
+      <p>⚠️ Please consult a medical professional immediately for further diagnosis and treatment options.</p>
+     
+    <% } else { %>
+      <p>✅ No signs of lung cancer detected with high confidence.</p>
+      <p>Still, regular checkups and healthy lifestyle are recommended.</p>
+    <% } %>
+  </div>
+
+  <!-- Chart -->
+  <canvas id="resultChart"></canvas>
+</div>
 
 <!-- Pass variables to JS -->
 <script>

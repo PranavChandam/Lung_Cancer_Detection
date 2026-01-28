@@ -47,12 +47,12 @@ def is_ct_scan(image_bytes):
             np.mean(np.abs(b - r))
         ) / 3
 
-        print("======== CT DEBUG VALUES ========")
-        print("Color STD:", color_std)
-        print("Texture STD:", texture_std)
-        print("Edges:", edge_count)
-        print("GrayScore:", grayscale_score)
-        print("=================================")
+        
+        # print("Color STD:", color_std)
+        # print("Texture STD:", texture_std)
+        # print("Edges:", edge_count)
+        # print("GrayScore:", grayscale_score)
+        # print("=================================")
 
         # FINAL STRICT RULES
         if (
@@ -68,6 +68,7 @@ def is_ct_scan(image_bytes):
     except Exception as e:
         print("Error:", e)
         return False
+
 
 
 

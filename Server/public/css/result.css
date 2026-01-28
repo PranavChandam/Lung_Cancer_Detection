@@ -91,3 +91,39 @@ footer.footer {
     font-size: 1.5rem;
   }
 }
+
+.result-container {
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.prediction-box {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.prediction-box.positive {
+  background: #e74c3c; /* red */
+}
+
+.prediction-box.negative {
+  background: #2ecc71; /* green */
+}
+
+.advice-box {
+  background: #f9f9f9;
+  padding: 15px;
+  border-left: 4px solid #3498db;
+  margin-bottom: 30px;
+  border-radius: 6px;
+  text-align: left;
+}

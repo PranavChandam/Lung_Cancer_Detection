@@ -85,3 +85,5 @@ Lung-Cancer-Detection-And-Prediction-Using-CTscan-main/.gradio/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+Server/Server/uploads/
