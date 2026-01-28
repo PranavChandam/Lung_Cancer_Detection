@@ -68,25 +68,25 @@ function Upload() {
     try {
       setLoading(true);
 
+      const token = localStorage.getItem("token");
+
       const res = await fetch("http://localhost:3000/api/predict", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
       const data = await res.json();
       setLoading(false);
 
-      if (data.error) {
-        setMessage(data.error);
+      if (!res.ok) {
+        setMessage(data.error || "Prediction failed");
         return;
       }
 
-      // Save to localStorage
-      localStorage.setItem("modelResults", JSON.stringify(data));
-
-      // Redirect to result page
       window.location.href = "/result";
-
     } catch (err) {
       console.error(err);
       setMessage("Something went wrong!");
@@ -97,14 +97,15 @@ function Upload() {
   return (
     <div className="upload-page">
       <h1 className="main-title">Lung Cancer Detection System</h1>
-      <p className="subtitle">Upload your CT scan for prediction</p>
+      <p className="subtitle" style={{ textAlign: "center" }}>
+        Upload your CT scan for prediction
+      </p>
 
       <div className="upload-card">
         <h2>Upload CT Scan Image</h2>
 
         {/* Original + Preprocessed */}
         <div className="image-row">
-          
           <div className="img-box">
             <h4>Original Image</h4>
             {file ? (
@@ -129,7 +130,12 @@ function Upload() {
         {/* Select File */}
         <label className="file-label">
           {file ? file.name : "Choose CT Scan Image"}
-          <input type="file" accept="image/*" className="file-input" onChange={handleFileChange} />
+          <input
+            type="file"
+            accept="image/*"
+            className="file-input"
+            onChange={handleFileChange}
+          />
         </label>
 
         {/* Upload Button */}
@@ -137,7 +143,18 @@ function Upload() {
           {loading ? "Processing..." : "Upload & Predict"}
         </button>
 
+        {/* Error Message */}
         {message && <p className="upload-message">{message}</p>}
+
+        {/* Refresh Button (visible only when error exists) */}
+        {message && (
+          <button
+            className="refresh-btn"
+            onClick={() => window.location.reload()}
+          >
+            Refresh
+          </button>
+        )}
       </div>
     </div>
   );
